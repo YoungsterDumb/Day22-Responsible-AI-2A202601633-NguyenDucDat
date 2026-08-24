@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0.0",
+  "metadata": {
+    "student_name": "Nguyen Duc Dat",
+    "student_id": "2A202601633",
+    "group_id": "GROUP-04",
+    "submitted_at": "2026-08-24T17:30:00+07:00"
+  },
+  "industry": "healthcare-assistant",
+  "product_context": {
+    "product_name": "CareLine Triage Companion",
+    "product_stage": "pilot",
+    "problem_statement": "Adult patients cannot judge whether a new symptom needs emergency care, a same-day slot or self-care, so the hospital call centre queue is first-in-first-out at peak hours and a deteriorating patient can wait behind a routine question.",
+    "target_users": [
+      "adult patients using the hospital patient app",
+      "triage nurses in the call centre",
+      "call-centre shift supervisors"
+    ],
+    "value_hypothesis": "A structured symptom intake plus a drafted disposition lets a triage nurse decide faster with better information, so time-to-nurse-decision falls for deteriorating patients without increasing the rate of missed escalations measured in weekly nurse audits.",
+    "in_scope": [
+      "structured symptom intake in Vietnamese and English",
+      "draft triage disposition proposed to the nurse queue",
+      "priority ordering of intakes that match red-flag rules",
+      "plain-language summary of what the patient reported"
+    ],
+    "non_goals": [
+      "diagnosis or differential diagnosis",
+      "medication, dosage or treatment advice",
+      "replacing the 115 emergency dispatch pathway",
+      "paediatric triage and mental-health crisis counselling",
+      "closing or downgrading a case without a nurse decision"
+    ],
+    "user_journey_moment": "After the patient submits a symptom intake in the app and before the triage nurse opens that case in the call-centre console.",
+    "target_launch_or_review_date": "2026-11-16",
+    "automation_level": "decision-support",
+    "fallback_experience": "If the assistant is unavailable, low-confidence or paused, the intake drops into the standard first-in-first-out nurse queue carrying the raw patient answers, and the app keeps showing the static red-flag card telling the patient to call 115 or go to the nearest emergency department.",
+    "decision_reversibility": "hard-to-reverse"
+  },
+  "system_profile": {
+    "purpose": "Collect a structured symptom history and draft a triage disposition that a licensed triage nurse must confirm, change or reject before anything is communicated to the patient.",
+    "user_groups": [
+      "adult patients",
+      "family members completing an intake for a relative",
+      "triage nurses",
+      "shift supervisors",
+      "clinical safety officer"
+    ],
+    "decision_impact": "The draft disposition changes how quickly a patient is called back and whether an emergency escalation is raised; a missed red flag delays time-critical treatment and that delay cannot be undone afterwards.",
+    "data_types": [
+      "self-reported symptoms and free-text complaints",
+      "age band and sex",
+      "chronic condition and pregnancy flags",
+      "patient-declared allergies",
+      "intake chat transcripts and nurse override notes"
+    ],
+    "deployment_context": "A private hospital group in Vietnam runs the assistant inside its patient app and call-centre console, calling a vendor-hosted large language model under a data-processing agreement, with an EU launch under discussion for a partner clinic network.",
+    "target_markets": ["Vietnam", "European Union"],
+    "system_boundary": {
+      "model": "vendor-hosted large language model with retrieval over the hospital's approved triage protocol, wrapped by a deterministic red-flag rule set that can only escalate and never downgrade",
+      "application": "patient app intake flow plus nurse triage console with reason codes, override, pause and patient call-back controls",
+      "people": [
+        "patients",
+        "family members entering symptoms for a relative",
+        "triage nurses",
+        "shift supervisor",
+        "clinical safety officer",
+        "vendor support engineers with production access"
+      ],
+      "vendors": [
+        "large language model provider",
+        "patient app platform vendor",
+        "cloud hosting region operator"
+      ],
+      "upstream_inputs": [
+        "approved hospital triage protocol",
+        "patient-entered symptom answers and free text",
+        "red-flag rule set version",
+        "same-day appointment capacity feed"
+      ],
+      "downstream_decisions": [
+        "raise an immediate 115 emergency escalation",
+        "book a same-day clinic slot",
+        "book a routine appointment",
+        "schedule a nurse call-back",
+        "give self-care advice with a safety-net instruction"
+      ]
+    }
+  },
+  "industry_risk_snapshot": {
+    "harm_severity": 5,
+    "high_stakes": 5,
+    "sensitive_data": 5,
+    "affected_scale": 4,
+    "human_review_need": 5,
+    "rationale": "A missed deterioration signal at the intake moment delays time-critical care and can end in death or permanent injury, so severity and stakes are at the top of the scale. The intake carries health data, which is sensitive personal data, and free text often contains identifiers. Scale is 4 rather than 5 because the pilot covers one call centre and adult non-emergency intakes only, yet every case still routes into a decision a nurse must own, so meaningful human review is mandatory. This triage score is a product prioritisation aid, not a legal classification."
+  },
+  "legal_classification": {
+    "vietnam": {
+      "status": "uncertain-requires-legal-review",
+      "rationale": "Triage support is plausibly inside the published high-risk list and it also processes health data, but the exact workflow, our provider or deployer role and the medical-device question must be mapped against the AI Law, its implementing instruments and the personal data protection law before any production release.",
+      "source_ids": ["SRC-06", "SRC-07", "SRC-08"]
+    },
+    "eu": {
+      "status": "high-risk",
+      "rationale": "Health triage sits in the high-risk area of the EU framework and a software function that supports a clinical decision may also be regulated as a medical device, so counsel must confirm which route applies and which obligation dates bind us before any European clinic launch.",
+      "source_ids": ["SRC-09"]
+    },
+    "other_markets": "No third market is in scope for this pilot; any launch outside Vietnam and the European Union requires a separate counsel review before build starts.",
+    "legal_review_required": true
+  },
+  "product_metrics": {
+    "success_kpi": "Median time from intake submission to nurse-confirmed disposition is at most 15 minutes for red-flag intakes and at most 60 minutes overall, sustained for four consecutive pilot weeks.",
+    "risk_kri": "Under-triage rate, defined as the share of audited intakes where the nurse or the outcome review raised the assistant draft by at least one urgency level, stays at or below 2 percent weekly with no upward trend across three weeks.",
+    "guardrail_metric": "Cases closed or urgency-downgraded without a recorded nurse decision must stay at exactly zero in every reporting period, and this number is never traded off against speed or queue-throughput targets.",
+    "review_cadence": "Weekly clinical safety review during the pilot and monthly in production, plus an event-triggered review within one working day of any missed red flag, vendor or model or prompt change, protocol update, new patient population or new target market."
+  },
+  "release_decision": {
+    "accountable_product_owner": "Digital Care Product Owner",
+    "risk_acceptance_owner": "Chief Medical Officer",
+    "independent_reviewer": "Hospital Clinical Safety and Ethics Committee",
+    "decision": "conditional-go",
+    "release_blockers": [
+      "GAP-01: Vietnam legal classification memo not yet signed, blocks production release",
+      "GAP-02: health-data lawful basis, impact assessment and vendor transfer review not finished, blocks production release",
+      "GAP-03: EU high-risk and medical-device route not determined, blocks the European clinic launch only",
+      "GAP-04: deterministic red-flag safety net not yet demonstrated end to end, blocks pilot start",
+      "GAP-05: retrospective under-triage evaluation with subgroup breakdown not yet run, blocks production release",
+      "GAP-06: nurse oversight capacity, information and override authority not yet evidenced under peak load, blocks pilot start",
+      "GAP-07: vendor change-control commitment on silent model or prompt changes not yet contracted, blocks production release"
+    ],
+    "release_conditions": [
+      "the assistant may only draft a disposition that a licensed triage nurse confirms, and it can never close, downgrade or send a disposition to a patient by itself",
+      "GAP-04 and GAP-06 are signed off before the first real patient intake enters the pilot",
+      "the pilot stays limited to one call centre, adult non-emergency intakes, and excludes paediatric and mental-health crisis pathways",
+      "GAP-01, GAP-02, GAP-05 and GAP-07 are closed with named evidence before any production release, and GAP-03 before any European clinic launch",
+      "an on-call clinical safety officer holds a standing authority to pause the assistant within one hour without a product or vendor approval"
+    ],
+    "next_review_trigger": "Review immediately on any missed red flag, on any under-triage or guardrail threshold breach, on any vendor model or prompt change, on adding a new patient population or market, and in every case no later than 2026-11-16.",
+    "residual_risk_rationale": "Residual risk is accepted only for a nurse-supervised pilot: the assistant is decision-support, the deterministic red-flag rules can escalate but never downgrade, every disposition carries a nurse decision record, and the pause path stops the feature within one hour. Residual severity stays high because a delayed escalation is irreversible, so the acceptance is bounded by scope limits, weekly audits and the stop thresholds in the harm map."
+  }
+}
